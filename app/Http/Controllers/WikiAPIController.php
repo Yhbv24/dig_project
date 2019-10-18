@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+
 class WikiAPIController extends Controller
 {
     /**
@@ -10,7 +12,8 @@ class WikiAPIController extends Controller
      */
     const LANGUAGES = [
         'en',
-        'de'
+        'de',
+        'fr'
     ];
 
     /**
@@ -55,17 +58,20 @@ class WikiAPIController extends Controller
         return $featuredArticles;
     }
 
-    public function getArticleSummaries()
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function getArticleSummaries(): string
     {
         $articles = $this->getCurrentArticles();
         $summaries = [];
 
         foreach ($articles as $article) {
-            foreach (self::LANGUAGES as $language) {
-                $summaries[$language] = ['summary' => strip_tags($article['summary'])];
-            }
+            $summaries[] = ['summary' => strip_tags($article['summary'])];
         }
 
-        return $summaries;
+        return json_encode($summaries);
     }
 }

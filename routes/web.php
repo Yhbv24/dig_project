@@ -18,3 +18,7 @@ $router->get('/', function () use ($router) {
 $router->get('/wiki', [
     'uses' => 'WikiAPIController@getArticleSummaries'
 ]);
+
+$router->get('/youtube', [
+    'uses' => 'YouTubeAPIController@getVideoInformation'
+]);

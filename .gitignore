@@ -4,3 +4,4 @@ Homestead.json
 Homestead.yaml
 .env
 .phpunit.result.cache
+youtube_api_key.php
