@@ -5,61 +5,101 @@ namespace App\Http\Controllers;
 class WikiAPIController extends Controller
 {
     /**
-     * Hits the Wikipedia API and returns a list of the feature articles
+     * Redis cache key
+     * @var string CACHE_KEY
+     */
+    const CACHE_KEY = 'wikipedia';
+
+    /**
+     * Redis expiry time, in seconds
+     * @var int TIME_TO_EXPIRE
+     */
+    const TIME_TO_EXPIRE = 172800; // 2 days
+
+    /**
+     * List of countries to fetch
+     *
+     * @var array COUNTRIES
+     */
+    const COUNTRIES = [
+        'United_Kingdom',
+        'Netherlands',
+        'Germany',
+        'France',
+        'Spain',
+        'Italy',
+        'Greece'
+    ];
+
+    /**
+     * Wikipedia API URL
+     * 
+     * @var string URL
+     */
+    const URL = 'https://en.wikipedia.org/w/api.php';
+
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Returns list of country articles' first paragraphs
+     *
+     * @return array
+     */
+    private function getCountryArticles(): array
+    {
+        $countryList = [];
+
+        foreach (self::COUNTRIES as $country) {
+            $url = self::URL . '?action=query&prop=extracts&format=json&titles=' . $country . '&exintro=1&explaintext=1';
+            $countryList[$country] = $this->fetchData($url);
+        }
+
+        return $countryList;
+    }
+
+    /**
+     * Parses articles' paragraphs
+     *
+     * @return array
+     */
+    private function getArticleInformation(): array
+    {
+        $articles = $this->getCountryArticles();
+        $informationToReturn = [];
+
+        foreach ($articles as $article) {
+            $article = json_decode($article, true);
+            $informationToReturn[] = $article['query']['pages'];
+        }
+
+        return $informationToReturn;
+    }
+
+    /**
+     * Returns JSON-encoded results in a name => description format
      *
      * @return string
      */
-    private function getFeaturedArticles(): array
+    public function get(): string
     {
-        $featureArticles = [];
+        if (!$this->client->exists(self::CACHE_KEY)) {
+            $articles = $this->getArticleInformation();
+            $informationToReturn = [];
 
-        foreach (self::LANGUAGES as $language) {
-            $wikiFeed = implode(file('https://' . $language . '.wikipedia.org/w/api.php?action=featuredfeed&feed=featured&feedformat=atom'));
-            $parsedXml = simplexml_load_string($wikiFeed);
-            $parsedJson = json_encode($parsedXml);
-            $featuredArticles[] = json_decode($parsedJson, true);
-        }
-
-        return $featuredArticles;
-    }
-
-    /**
-     * Gets the current articles based on today's date
-     *
-     * @return void
-     */
-    private function getCurrentArticles(): array
-    {
-        $featuredArticles = [];
-        $articles = $this->getFeaturedArticles();
-
-        foreach ($articles as $article) {
-            foreach ($article['entry'] as $todayArticle) {
-                $articleDate = explode('T', $todayArticle['updated'])[0];
-
-                if ($articleDate === date('Y-m-d')) {
-                    $featuredArticles[] = $todayArticle;
+            foreach ($articles as $article) {
+                foreach ($article as $info) {
+                    $informationToReturn[] = [$info['title'] => $info['extract']];
                 }
             }
+
+            // Set Redis cache
+            $this->client->set(self::CACHE_KEY, json_encode($informationToReturn));
+            $this->client->expire(self::CACHE_KEY, self::TIME_TO_EXPIRE);
         }
 
-        return $featuredArticles;
-    }
-
-    /**
-     * Returns list of article summaries
-     *
-     * @return void
-     */
-    public function getArticleSummaries(): string
-    {
-        $articles = $this->getCurrentArticles();
-        $summaries = [];
-
-        foreach ($articles as $article) {
-            $summaries[] = ['summary' => strip_tags($article['summary'])];
-        }
-
-        return json_encode($summaries);
+        return $this->client->get(self::CACHE_KEY);
     }
 }

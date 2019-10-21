@@ -20,8 +20,6 @@ $router->get('/', function () use ($router) {
  * their associated Wikipedia descriptions
  * Rate limited to 20 requests per minute
  */
-$router->group(['middleware' => 'throttle:20'], function () use ($router) {
-    $router->get('/api/countries', [
-        'uses' => 'YouTubeAPIController@getVideoInformation'
-    ]);
+$router->group(['middleware' => 'throttle:20,10'], function () use ($router) {
+    $router->get('/api/results', 'WikiAPIController@get');
 });

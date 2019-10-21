@@ -3,18 +3,16 @@
 namespace App\Http\Controllers;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
+use App\Http\Libs\Request;
 
 class Controller extends BaseController
 {
-    const REGIONS = [
-        'us',
-        'nl',
-        'de',
-        'fr',
-        'es',
-        'it',
-        'gr'
-    ];
+    protected $client;
+    
+    protected function __construct()
+    {
+        $this->client = new \Predis\Client();
+    }
 
     /**
      * Fetches data from a given URL

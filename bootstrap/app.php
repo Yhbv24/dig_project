@@ -2,6 +2,9 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/../youtube_api_key.php';
+require_once __DIR__.'/../vendor/predis/predis/autoload.php';
+
+Predis\Autoloader::register();
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
