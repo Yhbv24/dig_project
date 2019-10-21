@@ -38,6 +38,11 @@ class WikiAPIController extends Controller
      */
     const URL = 'https://en.wikipedia.org/w/api.php';
 
+    /**
+     * Class constructor
+     * 
+     * @return void
+     */
     public function __construct()
     {
         parent::__construct();
@@ -79,7 +84,7 @@ class WikiAPIController extends Controller
     }
 
     /**
-     * Returns JSON-encoded results in a name => description format
+     * Returns JSON-encoded results
      *
      * @return string
      */
@@ -91,7 +96,10 @@ class WikiAPIController extends Controller
 
             foreach ($articles as $article) {
                 foreach ($article as $info) {
-                    $informationToReturn[] = ['wiki_description' => $info['extract']];
+                    $informationToReturn[] = [
+                        'wiki_description' => $info['extract'],
+                        'country_title' => $info['title']
+                    ];
                 }
             }
 

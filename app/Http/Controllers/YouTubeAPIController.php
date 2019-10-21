@@ -40,6 +40,11 @@ class YouTubeAPIController extends Controller
         'gr'
     ];
 
+    /**
+     * Class constructor
+     * 
+     * @return void
+     */
     public function __construct()
     {
         parent::__construct();
