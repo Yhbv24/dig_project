@@ -91,7 +91,7 @@ class WikiAPIController extends Controller
 
             foreach ($articles as $article) {
                 foreach ($article as $info) {
-                    $informationToReturn[] = [$info['title'] => $info['extract']];
+                    $informationToReturn[] = ['wiki_description' => $info['extract']];
                 }
             }
 

@@ -21,5 +21,5 @@ $router->get('/', function () use ($router) {
  * Rate limited to 20 requests per minute
  */
 $router->group(['middleware' => 'throttle:20,10'], function () use ($router) {
-    $router->get('/api/results', 'WikiAPIController@get');
+    $router->get('/api/results', 'APIController@get');
 });

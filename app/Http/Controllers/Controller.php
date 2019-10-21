@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
-use App\Http\Libs\Request;
-
 class Controller extends BaseController
 {
     protected $client;

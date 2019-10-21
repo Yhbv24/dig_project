@@ -78,7 +78,7 @@ class YouTubeAPIController extends Controller
             $videoInfo = json_decode($videos[$i], true)['items'][0];
             $returnedVideos[] = [
                 'language' => self::REGIONS[$i],
-                'description' => $videoInfo['snippet']['description'],
+                'youtube_description' => $videoInfo['snippet']['description'],
                 'thumbnails' => [
                     $videoInfo['snippet']['thumbnails']['default'],
                     $videoInfo['snippet']['thumbnails']['high']
