@@ -6,6 +6,16 @@ use Laravel\Lumen\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
+    const REGIONS = [
+        'us',
+        'nl',
+        'de',
+        'fr',
+        'es',
+        'it',
+        'gr'
+    ];
+
     /**
      * Fetches data from a given URL
      *

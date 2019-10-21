@@ -3,21 +3,6 @@
 require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/../youtube_api_key.php';
 
-// Set a rate limit for hits
-session_start();
-session_destroy();
-if (!isset($_SESSION['rate_limit'])) {
-    $_SESSION['rate_limit'] = 30;
-} else {
-    if ($_SESSION['rate_limit'] === 0) {
-        echo 'You have hit the rate limit. Sorry';
-
-        return;
-    }
-
-    $_SESSION['rate_limit'] -= 1;
-}
-
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
 ))->bootstrap();
@@ -80,6 +65,10 @@ $app->singleton(
 // $app->routeMiddleware([
 //     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
+
+$app->routeMiddleware([
+    'throttle' => App\Http\Middleware\ThrottleRequests::class,
+]);
 
 /*
 |--------------------------------------------------------------------------

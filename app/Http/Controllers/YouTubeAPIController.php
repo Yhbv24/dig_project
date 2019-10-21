@@ -2,18 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Libs\Request;
 class YouTubeAPIController extends Controller
 {
-    const REGIONS = [
-        'us',
-        'nl',
-        'de',
-        'fr',
-        'es',
-        'it',
-        'gr'
-    ];
-
+    const URL = 'https://www.googleapis.com/youtube/v3/videos';
+    
     /**
      * Returns list of top videos for a given set of countries
      *
@@ -24,8 +17,9 @@ class YouTubeAPIController extends Controller
     {
         $topVideos = [];
 
-        foreach (self::REGIONS as $region) {
-            $url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&regionCode=' . $region . '&chart=mostpopular&maxResults=' . $maxResults. '&key=' . YOUTUBE_KEY;
+        foreach (parent::REGIONS as $region) {
+            $url = self::URL . '?part=snippet&regionCode=' . $region . '&chart=mostpopular&maxResults='
+            . $maxResults . '&key=' . YOUTUBE_KEY;
             $topVideos[] = parent::fetchData($url);
         }
 
@@ -39,22 +33,20 @@ class YouTubeAPIController extends Controller
      */
     public function getVideoInformation(): array
     {
-        $counter = 0;
         $returnedVideos = [];
         $videos = json_encode($this->getTopVideos(1));
         $videos = json_decode($videos, true);
 
-        foreach ($videos as $video) {
-            $videoInfo = json_decode($video, true)['items'][0];
+        for ($i = 0; $i < count($videos); $i++) {
+            $videoInfo = json_decode($videos[$i], true)['items'][0];
             $returnedVideos[] = [
-                'language' => self::REGIONS[$counter],
+                'language' => self::REGIONS[$i],
                 'description' => $videoInfo['snippet']['description'],
                 'thumbnails' => [
                     $videoInfo['snippet']['thumbnails']['default'],
                     $videoInfo['snippet']['thumbnails']['high']
                 ]
             ];
-            $counter++;
         }
 
         return $returnedVideos;

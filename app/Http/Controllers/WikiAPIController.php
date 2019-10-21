@@ -2,20 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-
 class WikiAPIController extends Controller
 {
-    /**
-     * @var array Languages to check
-     * Note: Some languages do not work
-     */
-    const LANGUAGES = [
-        'en',
-        'de',
-        'fr'
-    ];
-
     /**
      * Hits the Wikipedia API and returns a list of the feature articles
      *
@@ -59,7 +47,7 @@ class WikiAPIController extends Controller
     }
 
     /**
-     * Undocumented function
+     * Returns list of article summaries
      *
      * @return void
      */

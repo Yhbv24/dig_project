@@ -15,10 +15,13 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->get('/wiki', [
-    'uses' => 'WikiAPIController@getArticleSummaries'
-]);
-
-$router->get('/youtube', [
-    'uses' => 'YouTubeAPIController@getVideoInformation'
-]);
+/**
+ * Returns the JSON representation of the YouTube videos with
+ * their associated Wikipedia descriptions
+ * Rate limited to 20 requests per minute
+ */
+$router->group(['middleware' => 'throttle:20'], function () use ($router) {
+    $router->get('/api/countries', [
+        'uses' => 'YouTubeAPIController@getVideoInformation'
+    ]);
+});
