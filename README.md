@@ -20,14 +20,14 @@ In order to get started, you must have PHP >7.3 installed, along with Redis >5 a
 4. Navigate to the root directory, and run `redis-server` to start the Redis server.
 5. In another Terminal tab, run `php
 php -S localhost:8000 -t public` to start the server.
-6. To hit the endpoint, go to localhost:800/api/results. You can also add an offset and/or limit by adding ?offet= or ?limit=.
+6. To hit the endpoint, go to [localhost:800/api/results](localhost:800/api/results). You can also add an offset and/or limit by adding ?offet= or ?limit=.
 
 ### JSON Format
 
 The JSON format will be:
 ```
 {
-	"result_count": 7,
+    "result_count": 7,
 	"data": [
 		{
 			"id": 2,
