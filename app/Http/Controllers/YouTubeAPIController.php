@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\YouTube;
+
 class YouTubeAPIController extends Controller
 {
     /**
@@ -61,9 +63,13 @@ class YouTubeAPIController extends Controller
         $topVideos = [];
 
         foreach (self::REGIONS as $region) {
-            $url = self::URL . '?part=snippet&regionCode=' . $region . '&chart=mostpopular&maxResults='
-            . $maxResults . '&key=' . YOUTUBE_KEY;
-            $topVideos[] = $this->fetchData($url);
+            try {
+                $url = self::URL . '?part=snippet&regionCode=' . $region . '&chart=mostpopular&maxResults='
+                . $maxResults . '&key=' . YOUTUBE_KEY;
+                $topVideos[] = $this->fetchData($url);
+            } catch (\Exception $ex) {
+                $topVideos[] = ['error' => $ex->getMessage()];
+            }
         }
 
         return $topVideos;
@@ -80,15 +86,14 @@ class YouTubeAPIController extends Controller
         $returnedVideos = [];
 
         for ($i = 0; $i < count($videos); $i++) {
-            $videoInfo = json_decode($videos[$i], true)['items'][0];
-            $returnedVideos[] = [
-                'language' => self::REGIONS[$i],
-                'youtube_description' => $videoInfo['snippet']['description'],
-                'thumbnails' => [
-                    $videoInfo['snippet']['thumbnails']['default'],
-                    $videoInfo['snippet']['thumbnails']['high']
-                ]
-            ];
+            $videoInfo = json_decode($videos[$i])->items[0];
+            $thumbnail = $videoInfo->snippet->thumbnails;
+            $video = new YouTube(
+                self::REGIONS[$i],
+                $videoInfo->snippet->description,
+                [$thumbnail->default, $thumbnail->high]
+            );
+            $returnedVideos[] = $video->get();
         }
 
         return $returnedVideos;
@@ -104,8 +109,7 @@ class YouTubeAPIController extends Controller
     {
         if (!$this->client->exists(self::CACHE_KEY)) {
             $returnedVideos = [];
-            $videos = json_encode($this->getTopVideos(1));
-            $videos = json_decode($videos, true);
+            $videos = $this->getTopVideos(1);
             $returnedVideos = $this->getTopVideoForEachCountry($videos);
 
             // Set Redis cache

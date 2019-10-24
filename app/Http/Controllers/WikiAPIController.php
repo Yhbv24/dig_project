@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Wikipedia;
+
 class WikiAPIController extends Controller
 {
     /**
@@ -58,8 +60,12 @@ class WikiAPIController extends Controller
         $countryList = [];
 
         foreach (self::COUNTRIES as $country) {
-            $url = self::URL . '?action=query&prop=extracts&format=json&titles=' . $country . '&exintro=1&explaintext=1';
-            $countryList[$country] = $this->fetchData($url);
+            try {
+                $url = self::URL . '?action=query&prop=extracts&format=json&titles=' . $country . '&exintro=1&explaintext=1';
+                $countryList[] = $this->fetchData($url);
+            } catch (\Exception $ex) {
+                $countryList[] = ['error' => $ex->getMessge()];
+            }
         }
 
         return $countryList;
@@ -76,8 +82,8 @@ class WikiAPIController extends Controller
         $informationToReturn = [];
 
         foreach ($articles as $article) {
-            $article = json_decode($article, true);
-            $informationToReturn[] = $article['query']['pages'];
+            $article = json_decode($article);
+            $informationToReturn[] = $article->query->pages;
         }
 
         return $informationToReturn;
@@ -96,10 +102,8 @@ class WikiAPIController extends Controller
 
             foreach ($articles as $article) {
                 foreach ($article as $info) {
-                    $informationToReturn[] = [
-                        'wiki_description' => $info['extract'],
-                        'country_title' => $info['title']
-                    ];
+                    $article = new Wikipedia($info->extract, $info->title);
+                    $informationToReturn[] = $article->get();
                 }
             }
 

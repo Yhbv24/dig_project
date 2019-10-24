@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Results;
 
 class APIController extends Controller
 {   
@@ -35,14 +36,13 @@ class APIController extends Controller
     /**
      * Filters the request based on limit/offset
      *
-     * @param array $results
+     * @param Results $results
      * @param Request $request
      * @return array
      */
-    private function filter(array &$results, Request $request): array
+    private function filter(Results $results, Request $request): array
     {
-        $filteredResults = $results;
-        $data = $results['data'];
+        $data = $results->getData();
 
         if ($request->has('offset')) {
             $offset = $request->get('offset');
@@ -56,10 +56,10 @@ class APIController extends Controller
             $data = array_slice($data, 0, $limit);
         }
 
-        $filteredResults['data'] = $data;
-        $filteredResults['result_count'] = count($data);
+        $results->updateData($data);
+        $results->setCount(count($data));
 
-        return $filteredResults;
+        return $results->get();
     }
 
     /**
@@ -73,14 +73,11 @@ class APIController extends Controller
         // Combine results of both Wikipedia and YouTube
         $youTubeResults = json_decode($this->youTubeController->get());
         $wikiResults = json_decode($this->wikiController->get());
-        $results = [
-            'result_count' => count($youTubeResults),
-            'data' => []
-        ];
+        $results = new Results();
 
         // Build new array
         for ($i = 0; $i < count($youTubeResults); $i++) {
-            $results['data'][] = array_merge(['id' => $i + 1], (array) $youTubeResults[$i], (array) $wikiResults[$i]);
+            $results->setData($i, $youTubeResults[$i], $wikiResults[$i]);
         }
 
         // Filter based on limit/offset
