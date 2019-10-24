@@ -5,6 +5,13 @@ namespace App\Models;
 class Wikipedia
 {
     /**
+     * Article language
+     *
+     * @var string
+     */
+    private $language;
+
+    /**
      * Article description
      *
      * @var string
@@ -32,6 +39,17 @@ class Wikipedia
     }
 
     /**
+     * Sets the article's language
+     *
+     * @param string $language
+     * @return void
+     */
+    public function setLanguage(string $language): void
+    {
+        $this->language = $language;
+    }
+
+    /**
      * Returns this object represented as an array
      *
      * @return array
@@ -39,6 +57,7 @@ class Wikipedia
     public function get(): array
     {
         return [
+            'wiki_language' => $this->language,
             'wiki_description' => $this->description,
             'country_title' => $this->title
         ];

@@ -77,7 +77,13 @@ class APIController extends Controller
 
         // Build new array
         for ($i = 0; $i < count($youTubeResults); $i++) {
-            $results->setData($i, $youTubeResults[$i], $wikiResults[$i]);
+            $youtube = $youTubeResults[$i];
+            $wiki = $wikiResults[$i];
+            
+            if ($youtube->language === $wiki->wiki_language) {
+                unset($wiki->wiki_language);
+                $results->setData($i, $youtube, $wiki);
+            }
         }
 
         // Filter based on limit/offset

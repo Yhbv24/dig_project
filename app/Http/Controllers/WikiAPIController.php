@@ -24,13 +24,13 @@ class WikiAPIController extends Controller
      * @var array COUNTRIES
      */
     const COUNTRIES = [
-        'United_Kingdom',
-        'Netherlands',
-        'Germany',
-        'France',
-        'Spain',
-        'Italy',
-        'Greece'
+        'United_Kingdom' => 'us',
+        'Netherlands' => 'nl',
+        'Germany' => 'de',
+        'France' => 'fr',
+        'Spain' => 'es',
+        'Italy' => 'it',
+        'Greece' => 'gr'
     ];
 
     /**
@@ -59,7 +59,7 @@ class WikiAPIController extends Controller
     {
         $countryList = [];
 
-        foreach (self::COUNTRIES as $country) {
+        foreach (self::COUNTRIES as $country => $shorthand) {
             try {
                 $url = self::URL . '?action=query&prop=extracts&format=json&titles=' . $country . '&exintro=1&explaintext=1';
                 $countryList[] = $this->fetchData($url);
@@ -90,6 +90,26 @@ class WikiAPIController extends Controller
     }
 
     /**
+     * Adds language keys to each article to check against
+     * the YouTube language keys
+     *
+     * @param array $articles
+     * @return array
+     */
+    private function addKeysToArticles(array $articles): array
+    {
+        $returned = [];
+
+        for ($i = 0; $i < count($articles); $i++) {
+            $article = $articles[$i];
+            $article->setLanguage(array_values(self::COUNTRIES)[$i]);
+            $returned[] = $article->get();
+        }
+
+        return $returned;
+    }
+
+    /**
      * Returns JSON-encoded results
      *
      * @return string
@@ -102,10 +122,12 @@ class WikiAPIController extends Controller
 
             foreach ($articles as $article) {
                 foreach ($article as $info) {
-                    $article = new Wikipedia($info->extract, $info->title);
-                    $informationToReturn[] = $article->get();
+                    $wikiArticle = new Wikipedia($info->extract, $info->title);
+                    $informationToReturn[] = $wikiArticle;
                 }
             }
+
+            $informationToReturn = $this->addKeysToArticles($informationToReturn);
 
             // Set Redis cache
             $this->client->set(self::CACHE_KEY, json_encode($informationToReturn));
